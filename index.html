@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线上马拉松</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    .wrap {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 600px;
+        overflow: hidden;
+    }
+
+    img {
+        width: 100%;
+        display: block;
+    }
+
+    .box {
+        width: 90%;
+        min-width: 250px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -137px);
+    }
+
+    .cenBox {
+        width: 82%;
+        margin: 0px auto;
+        overflow: hidden;
+    }
+
+    .iptBox {
+        width: 100%;
+        line-height: 44px;
+        color: #ffcc06;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .ipt {
+        width: calc(100% - 20px);
+        border: none;
+        height: 44px;
+        outline: none;
+        font-size: 16px;
+        background-color: rgba(0, 0, 0, 0.4);
+        float: left;
+        border-radius: 5px;
+        padding: 0 10px;
+        text-align: center;
+        color: #fff;
+    }
+
+    .ipt::-webkit-input-placeholder {
+        font-size: 14px;
+        color: #fff;
+    }
+
+    .ipt.change::-webkit-input-placeholder {
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .btn {
+        width:100%;
+        text-align: center;
+        line-height: 44px;
+        float: left;
+        background-color: #1492FF;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <div class="wrap">
+        <img src="./a.png" alt="">
+        <div class="box">
+            <div class="cenBox">
+                <div class="iptBox">
+                    <input type="text" placeholder="请输入您的姓名" class="ipt" id="name">
+                </div>
+                <div class="iptBox">
+                    <input type="number" placeholder="请输入您的手机号" class="ipt" id="phone">
+                </div>
+                <div class="btn" id="save">提交</div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(function () {
+        $('.btn').click(function () {
+            let a = $('#name')
+            let b = $("#phone")
+            let reg = /^1[3456789]\d{9}$/
+            if (b.val() != '' && !reg.test(b.val())) {
+                b.val('')
+                b.attr('placeholder', "请输入正确手机号");
+                b.addClass('change')
+            }
+            if (a.val() != '' && b.val() != '' && reg.test(b.val())) {
+                let obj = {
+                    name: a.val(),
+                    phone: b.val()
+                }
+                // console.log(obj)
+                $.ajax({
+                    type: 'POST',
+                    url: 'https://paoner.lvtutech.com/huodong/activity/add',
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify(obj),
+                    success: function (res) {
+                        // console.log(res)
+                        window.location.href = "https://webevent.thejoyrun.com/activity/xiaopeng/?source=diandongban"
+                    },
+                    error: function () {
+                        //请求出错处理
+                    }
+                });
+            }
+
+        })
+    })
+</script>
+
+</html>

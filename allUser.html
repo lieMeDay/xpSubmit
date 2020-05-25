@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提交统计</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cuikangjie.github.io/JsonExportExcel/dist/JsonExportExcel.min.js"></script>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    .all {
+        float: right;
+        margin-bottom: 10px;
+    }
+
+    .all>span {
+        float: left;
+        line-height: 40px;
+        margin-right: 8px;
+    }
+
+    .tabBox {
+        width: 95%;
+        margin: 20px auto;
+    }
+    .pageWrap{
+        width: 100%;
+        margin-top: 10px;
+        position: relative;
+    }
+    .pageBox{
+        float: left;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+
+<body>
+    <div id="app">
+        <div class="tabBox">
+            <div class="all">
+                <span>总人数:{{tableData.length}}人</span>
+                <el-button type="primary" @click="port">导出</el-button>
+            </div>
+            <el-table :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)" border style="width: 100%">
+                <el-table-column prop="index" label="序号" align="center">
+                </el-table-column>
+                <el-table-column prop="name" label="姓名" align="center">
+                </el-table-column>
+                <el-table-column prop="phone" label="手机号" align="center">
+                </el-table-column>
+                <el-table-column prop="createData" label="提交时间" align="center">
+                </el-table-column>
+            </el-table>
+            <div class="pageWrap">
+                <div class="pageBox">
+                    <el-pagination :current-page.sync="currentPage"
+                        :page-size="pagesize" layout="prev, pager, next, jumper" :total="tableData.length">
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function getExcel(tab) {
+        var option = {};
+        option.fileName = '提交名单'
+        option.datas = [
+            {
+                sheetData: tab,
+                sheetHeader: ['序号', '姓名', '手机号', '提交时间']//前端指定的表头
+            }
+        ];
+        var toExcel = new ExportJsonExcel(option);
+        toExcel.saveExcel();
+    }
+    // const axios = require('axios');
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                tableData: [],
+                currentPage: 1,
+                pagesize: 10
+            }
+        },
+        methods: {
+            port() {
+                let tab = this.tableData
+                if (tab.length > 0) {
+                    let arr = []
+                    tab.forEach(v => {
+                        delete v.id
+                        let obj = {
+                            index: v.index,
+                            name: v.name,
+                            phone: v.phone,
+                            createData: v.createData
+                        }
+                        arr.push(obj)
+                    })
+                    getExcel(arr)
+                }
+            },
+        },
+        mounted() {
+            let that = this
+            // http://192.168.0.101:9988/activity/get
+            // https://paoner.lvtutech.com/huodong/activity/get
+            axios.get('http://192.168.0.101:9988/activity/get')
+                .then(function (res) {
+                    // handle success
+                    let r = res.data.data
+                    let dx = {};
+                    r = r.reduce(function (item, next) {
+                        dx[next.phone] ? "" : (dx[next.phone] = true && item.push(next));
+                        return item;
+                    }, []);
+                    r.forEach((v, i) => {
+                        v.index = i + 1
+                    })
+                    that.tableData = r
+                })
+        }
+    })
+</script>
+
+</html>
